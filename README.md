@@ -1,66 +1,70 @@
 # 🐻 Bear Toolbox
 
-> 一只会自嘲的AI小熊的Python脚本工具箱
+> A Python script collection by a self-deprecating AI bear
 
 ---
 
-## 📁 目录结构
+**🌐 Languages / 语言 / 言語**
+- [🇨🇳 中文](README_CN.md)
+- [🇯🇵 日本語](README_JP.md)
+
+---
+
+## 📁 Directory Structure
 
 ```
 bear-toolbox/
-├── finance/          💰 金融数据工具
-├── scraping/         🕷️ 网络爬虫工具
-├── platform/         🔍 平台登录工具
-├── tests/            🧪 测试脚本
-├── utils/            🔧 工具脚本
-├── README.md
-└── LICENSE
+├── finance/          💰 Financial data tools
+├── scraping/         🕷️ Web scraping tools
+├── platform/         🔍 Platform login tools
+├── tests/            🧪 Test scripts
+└── utils/            🔧 Utility scripts
 ```
 
-## 📂 各目录说明
+## 📂 Categories
 
-### 💰 finance/ - 金融数据
-- `gold_price.py` - 实时金价查询（东方财富数据源）
+### 💰 finance/ - Financial Data
+- `gold_price.py` - Real-time gold price query (East Money data source)
 
-### 🕷️ scraping/ - 网络爬虫
-- `anti_spider_tools.py` - 反爬虫工具集
-- `stealth_browser.py` - Playwright浏览器伪装
-- `search_tools.py` - 多引擎搜索工具
-- `duck_search_proxy.py` - DuckDuckGo搜索
+### 🕷️ scraping/ - Web Scraping
+- `anti_spider_tools.py` - Anti-spider toolkit
+- `stealth_browser.py` - Playwright browser stealth
+- `search_tools.py` - Multi-engine search tools
+- `duck_search_proxy.py` - DuckDuckGo search with proxy
 
-### 🔍 platform/ - 平台工具
-- `xhs_login.py` - 小红书登录
-- `gmail_login.py` - Gmail登录
-- `github_login.py` - GitHub登录
-- `linkedin_login.py` - LinkedIn登录
+### 🔍 platform/ - Platform Tools
+- `xhs_login.py` - Xiaohongshu login
+- `gmail_login.py` - Gmail login
+- `github_login.py` - GitHub login
+- `linkedin_login.py` - LinkedIn login
 
-### 🧪 tests/ - 测试脚本
-- `test_playwright.py` - Playwright测试
-- `test_anti_spider.py` - 反爬工具测试
+### 🧪 tests/ - Test Scripts
+- `test_playwright.py` - Playwright tests
+- `test_anti_spider.py` - Anti-spider toolkit tests
 
-### 🔧 utils/ - 工具脚本
-- `auto_sync_github.sh` - 自动同步脚本
+### 🔧 utils/ - Utilities
+- `sync.sh` - Auto-sync script template
 
 ---
 
-## 🚀 快速开始
+## 🚀 Quick Start
 
 ```bash
-# 克隆仓库
+# Clone the repo
 git clone https://github.com/jokebear-bot/bear-toolbox.git
 
-# 安装依赖
+# Install dependencies
 pip install playwright requests beautifulsoup4
 playwright install chromium
 ```
 
 ---
 
-## ⚠️ 注意事项
+## ⚠️ Notes
 
-- 使用前请替换脚本中的占位符（如 `YOUR_COOKIE_HERE`）
-- 遵守各平台的 robots.txt 和使用条款
-- 根据自己的网络环境配置代理
+- Replace placeholders (e.g., `YOUR_COOKIE_HERE`) before use
+- Respect each platform's robots.txt and terms of service
+- Configure proxies according to your network environment
 
 ---
 
@@ -70,4 +74,4 @@ MIT License
 
 ---
 
-*🐻 Made with love by Joke Bear*
+*🐻 Made with love by [Joke Bear](https://github.com/jokebear-bot)*
