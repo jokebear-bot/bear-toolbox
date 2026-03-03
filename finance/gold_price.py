@@ -1,134 +1,115 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-黄金实时价格获取脚本
-数据源：新浪财经实时行情API
+黄金实时价格获取脚本 v6
+数据源：东方财富 (最可靠)
 """
 
 import requests
-import json
-import sys
 from datetime import datetime
 
-def get_sina_gold_price():
-    """从新浪财经获取黄金实时价格"""
-    # 新浪实时行情API
-    # XAU为国际黄金现货，GC为COMEX黄金期货，AU为上海黄金
-    symbols = {
-        "国际黄金现货": "hf_XAU",
-        "COMEX黄金": "hf_GC",
-        "伦敦金": "hf_XAU",
-        "上海黄金延期": "au0"
+def get_eastmoney_gold():
+    """从东方财富获取黄金实时价格"""
+    url = "https://push2.eastmoney.com/api/qt/ulist.np/get"
+    params = {
+        "ut": "fa5fd1943c7b386f172d6893dbfba10b",
+        "fltt": "2",
+        "invt": "2",
+        "fields": "f2,f3,f4,f12,f13,f14,f18,f20,f21,f33,f34,f35,f36",
+        "secids": "101.GC00Y,122.XAU,113.au0"
+    }
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
     
-    results = {}
-    
-    for name, symbol in symbols.items():
-        try:
-            if symbol.startswith("hf_"):
-                # 外盘期货/现货
-                url = f"https://hq.sinajs.cn/list={symbol}"
-                headers = {
-                    "Referer": "https://finance.sina.com.cn",
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-                }
-                response = requests.get(url, headers=headers, timeout=10)
-                response.encoding = 'gbk'
-                
-                # 解析返回数据
-                data_str = response.text
-                if 'var hq_str_' in data_str:
-                    # 提取数据部分
-                    data = data_str.split('="')[1].rstrip('";').split(',')
-                    if len(data) >= 8:
-                        results[name] = {
-                            "最新价": data[0],
-                            "开盘价": data[1] if len(data) > 1 else "-",
-                            "最高价": data[2] if len(data) > 2 else "-",
-                            "最低价": data[3] if len(data) > 3 else "-",
-                            "昨收": data[4] if len(data) > 4 else "-",
-                            "时间": f"{data[-2]} {data[-1]}" if len(data) >= 2 else "-"
-                        }
-            else:
-                # 内盘黄金
-                url = f"https://hq.sinajs.cn/list=hf_{symbol}"
-                headers = {
-                    "Referer": "https://finance.sina.com.cn",
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-                }
-                response = requests.get(url, headers=headers, timeout=10)
-                response.encoding = 'gbk'
-                data_str = response.text
-                if 'var hq_str_' in data_str:
-                    data = data_str.split('="')[1].rstrip('";').split(',')
-                    if len(data) >= 8:
-                        results[name] = {
-                            "最新价": data[0],
-                            "开盘价": data[1] if len(data) > 1 else "-",
-                            "最高价": data[2] if len(data) > 2 else "-",
-                            "最低价": data[3] if len(data) > 3 else "-",
-                            "昨收": data[4] if len(data) > 4 else "-",
-                            "时间": f"{data[-2]} {data[-1]}" if len(data) >= 2 else "-"
-                        }
-        except Exception as e:
-            results[name] = {"错误": str(e)}
-    
-    return results
-
-def get_baidu_gold():
-    """备用：百度股市通黄金数据"""
     try:
-        url = "https://finance.pae.baidu.com/api/foreignquotation?srcid=5353&all=1&ktype=1&group=quotation_minute&query=现货黄金&code=XAU&market=gold&finClientType=pc"
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
-        }
-        response = requests.get(url, headers=headers, timeout=10)
+        response = requests.get(url, params=params, headers=headers, timeout=15)
         data = response.json()
-        return data
+        
+        results = {}
+        if "data" in data and "diff" in data["data"]:
+            for item in data["data"]["diff"]:
+                code = item.get("f12")
+                name = item.get("f14")
+                price = item.get("f2")
+                change = item.get("f4")
+                change_pct = item.get("f3")
+                prev_close = item.get("f18")
+                high = item.get("f33")
+                low = item.get("f34")
+                
+                results[code] = {
+                    "名称": name,
+                    "最新价": price,
+                    "涨跌额": change,
+                    "涨跌幅": change_pct,
+                    "昨收": prev_close,
+                    "最高": high,
+                    "最低": low
+                }
+        return results
     except Exception as e:
         return {"错误": str(e)}
 
-def format_output(results):
-    """格式化输出"""
-    print("=" * 50)
+if __name__ == "__main__":
+    print("=" * 65)
     print(f"🪙 黄金实时行情 - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("=" * 50)
+    print("=" * 65)
     
-    # 汇率（可根据实际情况调整）
+    # 汇率
     USD_CNY = 7.25
     OUNCE_TO_GRAM = 31.1035
     
-    for name, data in results.items():
-        print(f"\n📊 {name}")
-        if "错误" in data:
-            print(f"   获取失败: {data['错误']}")
-        else:
-            try:
-                price_usd = float(data.get("最新价", 0))
-                if price_usd > 1000:  # 可能是美元/盎司
-                    price_cny_per_oz = price_usd * USD_CNY
-                    price_cny_per_g = price_cny_per_oz / OUNCE_TO_GRAM
-                    print(f"   💰 美元/盎司: ${price_usd:.2f}")
-                    print(f"   💰 人民币/克: ¥{price_cny_per_g:.2f}")
-                else:
-                    print(f"   💰 价格: {price_usd}")
+    data = get_eastmoney_gold()
+    
+    if "错误" in data:
+        print(f"\n❌ 获取失败: {data['错误']}")
+    else:
+        # COMEX黄金
+        if "GC00Y" in data:
+            print("\n📊 COMEX黄金期货 (GC00Y)")
+            item = data["GC00Y"]
+            price = item.get("最新价", 0)
+            if price:
+                cny_per_gram = price * USD_CNY / OUNCE_TO_GRAM
+                print(f"   💰 美元/盎司: ${price:,.2f}")
+                print(f"   💱 约人民币/克: ¥{cny_per_gram:,.2f}")
                 
-                if data.get("最高价") and data.get("最高价") != "-":
-                    print(f"   📈 最高: {data['最高价']}")
-                if data.get("最低价") and data.get("最低价") != "-":
-                    print(f"   📉 最低: {data['最低价']}")
-            except:
-                for key, value in data.items():
-                    print(f"   {key}: {value}")
+                change = item.get("涨跌额", 0)
+                change_pct = item.get("涨跌幅", 0)
+                if change and change > 0:
+                    print(f"   📈 涨跌: +{change:,.2f} (+{change_pct}%)")
+                elif change and change < 0:
+                    print(f"   📉 涨跌: {change:,.2f} ({change_pct}%)")
+                
+                if item.get("最高"):
+                    print(f"   ⬆️ 最高: ${item['最高']:,.2f}")
+                if item.get("最低"):
+                    print(f"   ⬇️ 最低: ${item['最低']:,.2f}")
+                if item.get("昨收"):
+                    print(f"   📊 昨收: ${item['昨收']:,.2f}")
+        
+        # 伦敦金/美元
+        if "XAU" in data:
+            print("\n📊 伦敦金现货 (XAU/USD)")
+            item = data["XAU"]
+            price = item.get("最新价", 0)
+            if price:
+                cny_per_gram = price * USD_CNY / OUNCE_TO_GRAM
+                print(f"   💰 美元/盎司: ${price:,.2f}")
+                print(f"   💱 约人民币/克: ¥{cny_per_gram:,.2f}")
+        
+        # 沪金
+        if "au0" in data:
+            print("\n📊 沪金主连 (au0)")
+            item = data["au0"]
+            price = item.get("最新价", 0)
+            if price:
+                print(f"   💰 人民币/克: ¥{price:,.2f}")
     
-    print("\n" + "=" * 50)
-    print("💡 说明：人民币价格按汇率7.25估算，实际以银行报价为准")
-
-if __name__ == "__main__":
-    results = get_sina_gold_price()
-    format_output(results)
-    
-    # 输出JSON格式供其他程序调用
-    if len(sys.argv) > 1 and sys.argv[1] == "--json":
-        print("\n[JSON输出]")
-        print(json.dumps(results, ensure_ascii=False, indent=2))
+    print("\n" + "=" * 65)
+    print("💡 说明：")
+    print("   • 数据来源: 东方财富")
+    print("   • 银行纸黄金通常在国际金价基础上加10-20元/克溢价")
+    print("   • 人民币价格按汇率7.25估算")
+    print("   • 本数据仅供参考，不构成投资建议")
