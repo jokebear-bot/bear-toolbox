@@ -121,7 +121,7 @@ def main():
     args = parser.parse_args()
     
     # 从环境变量获取代理
-    proxy = args.proxy or os.environ.get('HTTP_PROXY') or os.environ.get('http_proxy')
+    proxy = args.proxy or os.environ.get('HTTP_PROXY') or os.environ.get('http_proxy') or 'http://127.0.0.1:7890'
     
     url = FT_RSS_FEEDS.get(args.source, FT_RSS_FEEDS['home'])
     
